@@ -1629,7 +1629,6 @@ let best = 0
 function renderUI() {
   //renderBrain(bacteria.brain, 0, 0, 600)
 
-
   if(false) {
     lastGenScore()
 
