@@ -18,7 +18,7 @@ canvas.height = 850;
 let _inputData
 
 let GEN = 1
-let killPercent = 20
+let killPercent = 50
 
 let TPS = 30
 let FPS = 30
@@ -28,9 +28,9 @@ let TIME = 0
 let TIMESTEP = 1000/FPS
 let CLOCK = 0
 let temp_CLOCK = 0
-let FOOD_TIME = 0.2 * TPS
+let FOOD_TIME = 0.1 * TPS
 let FOOD_TIMER = 0
-let ROUND_TIME = 5 * TPS
+let ROUND_TIME = 10 * TPS
 let ROUND_TIMER = 0
 let ENERGY_TIME = 0.2 * TPS
 let ENERGY_TIMER = 0
@@ -51,7 +51,7 @@ function range(from, to) {
 }
 
 const numBacteria = 60
-const BRAINSIZE = 20
+const BRAINSIZE = 10
 
 let orientations = [[0, 1], [1, 0], [0, -1], [-1, 0]]
 
@@ -249,10 +249,10 @@ const MUTATION_CHANCE = {
 }
 
 const MUTATION_QUANTITY = {
-  addNeuron: 3,
+  addNeuron: 4,
   removeNeuron: 3,
-  addSynapse: 8,
-  removeSynapse: 6
+  addSynapse: 4,
+  removeSynapse: 3
 }
 
 class Neuron {
@@ -1036,7 +1036,7 @@ function lastGenScore() {
 }
 
 let foodEnergy = 100
-let foodReward = 1000
+let foodReward = 1
 
 // 0 - empty space, 1 - wall, 2 - organism, 3 - food
 
@@ -1236,7 +1236,7 @@ class petriDish {
           case 'f':
             ctx.fillStyle = terrainColors.emptySpace
             ctx.fillRect(x * this.tileSize + 30, y * this.tileSize + 30, this.tileSize, this.tileSize)
-            ctx.fillStyle = 'black'
+            ctx.fillStyle = 'darkgreen'
             ctx.fillRect(x * this.tileSize + 30 + foodOffset - foodBG, y * this.tileSize + 30 + foodOffset - foodBG, foodSize + foodBG * 2, foodSize + foodBG * 2)
             ctx.fillStyle = terrainColors.food
             ctx.fillRect(x * this.tileSize + 30 + foodOffset, y * this.tileSize + 30 + foodOffset, foodSize, foodSize)
@@ -1249,8 +1249,8 @@ class petriDish {
             ctx.fillStyle = this.organismColors[tile]
             ctx.fillRect(x * this.tileSize + 30, y * this.tileSize + 30, this.tileSize, this.tileSize)
             //console.log(this.manager.species[tile].body)
-            ctx.fillText(`${this.manager.species[tile].body.energy}`, x * this.tileSize + 40, y * this.tileSize)
-            ctx.fillText(`${this.manager.species[tile].body.HP}`, x * this.tileSize + 40, y * this.tileSize + 20)
+            //ctx.fillText(`${this.manager.species[tile].body.energy}`, x * this.tileSize + 40, y * this.tileSize)
+            //ctx.fillText(`${this.manager.species[tile].body.HP}`, x * this.tileSize + 40, y * this.tileSize + 20)
 
           break
         }
@@ -1382,14 +1382,14 @@ class SpeciesManager {
   }
 
   killPercent(percent = killPercent) {
-    this.survivorCount = ~~(this.species.length * killPercent/100)
+    this.survivorCount = ~~(this.species.length - this.species.length * killPercent/100)
   this.sort()
-    this.speciesTemp = this.species.splice(0, this.species.length - this.survivorCount)
+    this.speciesTemp = this.species.splice(0, this.survivorCount)
   }
   
   sort() {
-    this.species.sort((a, b) => b.score - a.score)
-    
+    this.species.sort((a, b) => b.foodsConsumed - a.foodsConsumed)
+    console.log(this.species)
   }
   
   breed(type = 'equal') {
@@ -1629,6 +1629,7 @@ let best = 0
 function renderUI() {
   //renderBrain(bacteria.brain, 0, 0, 600)
 
+
   if(false) {
     lastGenScore()
 
@@ -1638,16 +1639,17 @@ function renderUI() {
     //renderBrain(manager.species[manager.lastScore[2][0]].brain, 200, 670, 120)
     //renderBrain(manager.species[manager.lastScore[3][0]].brain, 370, 670, 120)
   } else {
-  lastGenScore()
-  renderBrain(manager.species[0].brain, 30, 670, 120)
-  renderBrain(manager.species[1].brain, 200, 670, 120)
-  renderBrain(manager.species[2].brain, 370, 670, 120)
-  renderBrain(manager.species[0].brain, 680, 30, SIZE)
+    lastGenScore()
+    //console.log(manager.species[0])
+    renderBrain(manager.species[0].brain, 30, 670, 120)
+    renderBrain(manager.species[1].brain, 200, 670, 120)
+    renderBrain(manager.species[2].brain, 370, 670, 120)
+    renderBrain(manager.species[0].brain, 680, 30, SIZE)
   }
   ctx.font = "30px Arial";
-    ctx.fillStyle = 'white'
+  ctx.fillStyle = 'white'
 
-    ctx.fillText(`GEN: ${GEN}`, 1200, 800);
+  ctx.fillText(`GEN: ${GEN}`, 1200, 800);
 }
 
 
@@ -1688,7 +1690,7 @@ function render() {
   ctx.fillStyle = 'black'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   renderUI()
-  debugBrain(bacteria.brain)
+  //debugBrain(bacteria.brain)
   petri.render()
   //manager.render()
   ctx.font = "10px Arial";
@@ -1703,7 +1705,7 @@ function gameLoop() {
     // Calculate the elapsed time since the last game loop iteration
     elapsedTime += Date.now() - lastTickTime;
     lastTickTime = Date.now();
-
+    
     while (elapsedTime >= tickInterval) {
       update();
       CLOCK ++
