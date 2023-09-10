@@ -28,9 +28,9 @@ let TIME = 0
 let TIMESTEP = 1000/FPS
 let CLOCK = 0
 let temp_CLOCK = 0
-let FOOD_TIME = 0.1 * TPS
+let FOOD_TIME = 0.2 * TPS
 let FOOD_TIMER = 0
-let ROUND_TIME = 10 * TPS
+let ROUND_TIME = 20 * TPS
 let ROUND_TIMER = 0
 let ENERGY_TIME = 0.2 * TPS
 let ENERGY_TIMER = 0
@@ -50,7 +50,7 @@ function range(from, to) {
   return ~~(random() * (to - from) + from)
 }
 
-const numBacteria = 60
+const numBacteria = 30
 const BRAINSIZE = 10
 
 let orientations = [[0, 1], [1, 0], [0, -1], [-1, 0]]
@@ -242,16 +242,16 @@ const processor = {
 }
 
 const MUTATION_CHANCE = {
-  addNeuron: 10,
-  removeNeuron: 10,
-  addSynapse: 20,
-  removeSynapse: 20
+  addNeuron: 50,
+  removeNeuron: 50,
+  addSynapse: 50,
+  removeSynapse: 50
 }
 
 const MUTATION_QUANTITY = {
-  addNeuron: 4,
+  addNeuron: 3,
   removeNeuron: 3,
-  addSynapse: 4,
+  addSynapse: 3,
   removeSynapse: 3
 }
 
@@ -359,7 +359,7 @@ class Brain {
     return copy
   }
 
-  randomize = (numNeurons = 5, numSynapses = 10) => {
+  randomize = (numNeurons = 10, numSynapses = 30) => {
     //this.neurons = []
     this.addRandomNeurons(numNeurons)
     this.addRandomSynapses(numSynapses, 100)
@@ -495,6 +495,7 @@ class Brain {
       neuron.ins = null
       neuron.x = i
       neuron.y = 0
+      neuron.max = 2
       neuron.id = posToIdString(neuron.x, neuron.y)
       this.neurons.push(neuron)
     }
@@ -504,6 +505,7 @@ class Brain {
       neuron.outs = null
       neuron.x = this.size - 1 - i
       neuron.y = this.size - 1
+      neuron.max = 2
       neuron.id = posToIdString(neuron.x, neuron.y)
       this.neurons.push(neuron)
     }
@@ -558,7 +560,7 @@ class Brain {
     return outs
   }
 
-  addRandomSynapses(numSynapses, numTries = numSynapses * 100) {
+  addRandomSynapses(numSynapses, numTries = numSynapses * 1000) {
     if(this.neurons.length > 0) {
 
       let availableOuts = this.availableOuts()
@@ -578,7 +580,7 @@ class Brain {
             return neuron.id == b
           })[0]
   
-          if(a !== b) {
+          if(a !== b && neuronA.outs.size < neuronA.max && neuronB.ins.size < neuronB.max) {
             this.addSynapse(neuronA, neuronB)
           }
         }
@@ -1059,7 +1061,7 @@ const terrainColors = {
 } 
 
 class petriDish {
-  constructor(width, height, res = 30) {
+  constructor(width, height, res = 40) {
     this.width = width
     this.height = height
     this.res = res
