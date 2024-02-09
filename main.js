@@ -28,9 +28,9 @@ let TIME = 0
 let TIMESTEP = 1000/FPS
 let CLOCK = 0
 let temp_CLOCK = 0
-let FOOD_TIME = 0.2 * TPS
+let FOOD_TIME = 0.4 * TPS
 let FOOD_TIMER = 0
-let ROUND_TIME = 20 * TPS
+let ROUND_TIME = 10 * TPS
 let ROUND_TIMER = 0
 let ENERGY_TIME = 0.2 * TPS
 let ENERGY_TIMER = 0
@@ -50,7 +50,7 @@ function range(from, to) {
   return ~~(random() * (to - from) + from)
 }
 
-const numBacteria = 30
+const numBacteria = 40
 const BRAINSIZE = 10
 
 let orientations = [[0, 1], [1, 0], [0, -1], [-1, 0]]
@@ -384,7 +384,6 @@ class Brain {
       }
     }
 
-    //console.log(freeSpots)
     this.freeSpots = freeSpots
     return freeSpots 
   }
@@ -397,7 +396,6 @@ class Brain {
     let randomY = randomSpot[1]
     
     let neuron = createRandomNeuron()
-    //console.log(neuron)
     neuron.x = randomX
     neuron.y = randomY
 
@@ -678,18 +676,14 @@ class Brain {
   }
 
   fire(neuron) {
-    // Define a queue to store the output neurons
     let clocks = [...this.getGenerators()]
     
     let queue = [...[...this.getInputs()].map((n) => {return n.id}),...[...clocks.map((n) => {return n.id})]];
     
     clocks = clocks.map((n) => {CLOCK % n.vars[0] == 0 ? n.firing = true : n.firing = false})
 
-    //console.log(queue)
-    // Keep track of the nodes that have been visited
     const visited = new Set()
 
-    // Store the firing status of all neurons in the queue
     const firingStatus = new Map();
     while (queue.length > 0) {
         let currentNeuron = queue.shift();
@@ -760,44 +754,34 @@ class Brain {
 }
 
 function drawArrow(fromx, fromy, tox, toy, arrowWidth, color) {
-  //variables to be used when creating the arrow
   var headlen = 10;
   var angle = Math.atan2(toy-fromy,tox-fromx);
 
   ctx.save();
-  //ctx.strokeStyle = color;
 
-  //starting path of the arrow from the start square to the end square
-  //and drawing the stroke
   ctx.beginPath();
   ctx.moveTo(fromx, fromy);
   ctx.lineTo(tox, toy);
   ctx.lineWidth = arrowWidth;
   ctx.stroke();
 
-  //starting a new path from the head of the arrow to one of the sides of
-  //the point
   ctx.beginPath();
   ctx.moveTo(tox, toy);
   ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
              toy-headlen*Math.sin(angle-Math.PI/7));
 
-  //path from the side point of the arrow, to the other side point
   ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),
              toy-headlen*Math.sin(angle+Math.PI/7));
 
-  //path from the side point back to the tip of the arrow, and then
-  //again to the opposite side point
   ctx.lineTo(tox, toy);
   ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),
              toy-headlen*Math.sin(angle-Math.PI/7));
 
-  //draws the paths created above
   ctx.stroke();
   ctx.restore();
 }
 
-//RENDERG FUNCTION
+//RENDER FUNCTION
 function renderBrain(brain, x = 0, y = 0, size = 100) {
   
   let cellsize = ~~(size / brain.size)
@@ -807,8 +791,6 @@ function renderBrain(brain, x = 0, y = 0, size = 100) {
   let specialtyX = (cellsize - specialtySize) / 2
   let specialtyY = (cellsize - specialtySize) / 2
   
-  //CLEAR CANVAS
-
   //EMPTY CELLS
   for(let i = 0; i < brain.size; i++) {
     for(let j = 0; j < brain.size; j++) {
@@ -826,7 +808,7 @@ function renderBrain(brain, x = 0, y = 0, size = 100) {
     if(brain.neurons[i].firing) {
       ctx.fillStyle = TYPE_COLORS.logic[brain.neurons[i].logic]
     } else {
-      ctx.fillStyle = 'BLACK'//TYPE_COLORS.logic[brain.neurons[i].logic]''
+      ctx.fillStyle = 'BLACK'
     }
     ctx.fillRect(brain.neurons[i].x * cellsize + x, brain.neurons[i].y * cellsize + y, cellsize, cellsize)
     ctx.strokeStyle = 'black'
@@ -1177,8 +1159,6 @@ class petriDish {
   
         let facingX = bacteria.x + orientations[ori][0]
         let facingY = bacteria.y + orientations[ori][1]
-        //console.log(bacteria.x, bacteria.y, orientations[ori][0], orientations[ori][1])
-        //console.log(ori)
         
         if(facingX < this.res && facingY < this.res && facingX > 0 && facingY > 0) {
           let facing = this.data[facingY][facingX]
@@ -1250,9 +1230,6 @@ class petriDish {
 
             ctx.fillStyle = this.organismColors[tile]
             ctx.fillRect(x * this.tileSize + 30, y * this.tileSize + 30, this.tileSize, this.tileSize)
-            //console.log(this.manager.species[tile].body)
-            //ctx.fillText(`${this.manager.species[tile].body.energy}`, x * this.tileSize + 40, y * this.tileSize)
-            //ctx.fillText(`${this.manager.species[tile].body.HP}`, x * this.tileSize + 40, y * this.tileSize + 20)
 
           break
         }
@@ -1288,7 +1265,6 @@ rotateArray.clockWise = (array) => {
   for (let i = 0; i < rows; i++) {
     temp[i].reverse()
   }
-
 
   return temp
 }
@@ -1354,7 +1330,6 @@ class SpeciesManager {
         }
       }
       this.speciesSensoryData[i] = surroundingData
-      //console.log(surroundingData)
     }
   }
 
@@ -1391,19 +1366,13 @@ class SpeciesManager {
   
   sort() {
     this.species.sort((a, b) => b.foodsConsumed - a.foodsConsumed)
-    console.log(this.species)
   }
   
   breed(type = 'equal') {
     this.species = []
     if(type == 'equal') {
       for(let i = 0; i < numBacteria; i++) {
-        //console.log(i % this.survivorCount)
         let newBacteria = this.speciesTemp[i % this.survivorCount].copy()
-        // newBacteria.blank()
-        // newBacteria.copyBrainFrom(this.speciesTemp[i % this.survivorCount])
-        // newBacteria.copyBodyFrom(this.speciesTemp[i % this.survivorCount])
-        // newBacteria.copyDataFrom(this.speciesTemp[i % this.survivorCount])
         this.species.push(newBacteria)
       }
     }
@@ -1414,9 +1383,7 @@ class SpeciesManager {
     this.getLastScore()
     PAUSED = false
     GEN++
-    console.log(this.score)
     this.saveGen()
-    //this.killHalf()
     this.killPercent()
     this.breed()
     this.scores.push(this.score)
@@ -1590,10 +1557,7 @@ class SpeciesManager {
     this.inputReady()
     this.feedInputs()
     this.metabolism()
-    //console.log(this.inputData)
     for(let i = 0; i < numBacteria; i++) {
-      //  this.species[i].brain.inputNoise()
-      //this.species[i].brain.outputNoise()
       this.species[i].brain.fire()
       this.species[i].oldX = this.species[i].x
       this.species[i].oldY = this.species[i].y
@@ -1654,25 +1618,12 @@ function renderUI() {
   ctx.fillText(`GEN: ${GEN}`, 1200, 800);
 }
 
-
-
-
-
-
-// Set the desired TPS and calculate the tick interval
-
 const tickInterval = 1000 / TPS;
-
-// Set the maximum FPS
 const maxFPS = 60;
-
-
 let elapsedTime = 0;
 let lastTickTime = Date.now();
 
 function update() {
-  //console.log("Updating game state");
-  
   manager.roundLoop()
   petri.moveBacteria()
 
@@ -1692,9 +1643,7 @@ function render() {
   ctx.fillStyle = 'black'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   renderUI()
-  //debugBrain(bacteria.brain)
   petri.render()
-  //manager.render()
   ctx.font = "10px Arial";
   ctx.fillStyle = 'white'
   
@@ -1704,7 +1653,6 @@ function render() {
 
 function gameLoop() {
   if(!PAUSED) {
-    // Calculate the elapsed time since the last game loop iteration
     elapsedTime += Date.now() - lastTickTime;
     lastTickTime = Date.now();
     
